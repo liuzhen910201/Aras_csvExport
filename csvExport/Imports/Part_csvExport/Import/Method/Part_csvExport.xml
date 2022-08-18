@@ -1,0 +1,110 @@
+﻿<AML>
+ <Item type="Method" id="5F1437B20B184CBFA4CA3E8195C7622A" action="add">
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// 検索画面から実行された場合
+if (aras.getMostTopWindowWithAras(window).main &&
+        aras.getMostTopWindowWithAras(window).main.work &&
+        aras.getMostTopWindowWithAras(window).main.work.gridApplet) 
+    {
+        aras.AlertError("アイテム画面から実行してください。");
+        return;
+    }
+
+// イノベータオブジェクト取得
+var inn = this.getInnovator();
+// パートアイテムのID取得
+var partId = thisItem.getID();
+if(partId == "")
+{
+  return;
+}
+var myItem = inn.getItemById("Part", partId);
+var level=0;
+//タイトル
+var rows = [
+    ["パーツ番号", "名称", "単位", "内製/調達", "順番", "数量"]
+];
+
+var parentList=[];
+parentList.push(myItem.getProperty("item_number"));
+parentList.push(myItem.getProperty("name"));
+parentList.push(myItem.getProperty("unit"));
+parentList.push(myItem.getProperty("make_buy"));
+parentList.push("");
+parentList.push("");
+rows.push(parentList);
+
+
+myItem=myItem.apply();
+var result = getItemList(myItem);
+
+csvExport(rows);
+
+
+function getItemList(prtParent){
+    prtParent.fetchRelationships("Part BOM");
+    var rels = prtParent.getRelationships("Part BOM");
+    
+     if(rels != null)
+    {
+        if(rels.getItemCount()>0){
+            level+=1;
+        }
+        
+        for(var i = 0; i < rels.getItemCount(); i++)
+        {
+            if(level>5){
+                break;
+            }
+            // パートアイテムの子パート取得
+            var prtChild = rels.getItemByIndex(i).getRelatedItem();
+            var bomRel = rels.getItemByIndex(i);
+            var propertyList=csvList(prtChild,bomRel);
+            
+            // 再帰呼び出し
+            getItemList(prtChild);
+        }
+    }
+    return prtParent;
+}
+
+
+function csvList(prt,bom){
+    var propertyList=[];
+    propertyList.push(prt.getProperty("item_number"));
+    propertyList.push(prt.getProperty("name"));
+    propertyList.push(prt.getProperty("unit"));
+    propertyList.push(prt.getProperty("make_buy"));
+    if(prt.getID()==partId){
+        propertyList.push("");
+        propertyList.push("");
+    }else{
+        propertyList.push(bom.getProperty("sort_order"));
+        propertyList.push(bom.getProperty("quantity")); 
+    }
+    
+    
+    rows.push(propertyList);
+    
+    return propertyList;
+}
+
+function csvExport(rows){
+    let csvContent = "data:text/csv;charset=UTF-8," 
+    + rows.map(e => e.join(",")).join("\n");
+    
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "data.csv");
+    document.body.appendChild(link);
+    link.click();
+}
+
+return result;
+
+]]></method_code>
+  <method_type>JavaScript</method_type>
+  <name>Part_csvExport</name>
+ </Item>
+</AML>

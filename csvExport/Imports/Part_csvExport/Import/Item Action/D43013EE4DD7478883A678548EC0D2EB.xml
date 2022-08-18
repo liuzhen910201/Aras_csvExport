@@ -1,0 +1,21 @@
+﻿<AML>
+ <Item type="Item Action" id="D43013EE4DD7478883A678548EC0D2EB" action="add">
+  <related_id keyed_name="Part_csvExport" type="Action">
+   <Item type="Action" id="45E0E74F994040C590DD340CFD0A541E" action="add">
+    <item_query>&lt;Item type="{@type}" id="{@id}" levels= "1" action="get" /&gt;</item_query>
+    <label xml:lang="en">部品表アイテムの出力</label>
+    <location>client</location>
+    <method keyed_name="Part_csvExport" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Part_csvExport</name>
+     </Item>
+    </method>
+    <target>none</target>
+    <type>item</type>
+    <name>Part_csvExport</name>
+   </Item>
+  </related_id>
+  <sort_order>1664</sort_order>
+  <source_id keyed_name="Part" type="ItemType" name="Part">4F1AC04A2B484F3ABA4E20DB63808A88</source_id>
+ </Item>
+</AML>
